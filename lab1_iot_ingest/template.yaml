@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lab1 - IoT Ingest Pipeline (API -> Lambda -> S3)
+
+Parameters:
+  DataLakeBucketName:
+    Type: String
+    Default: "kc-iot-datalake-${AWS::AccountId}"
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 10
+
+Resources:
+
+  DataLakeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref DataLakeBucketName
+      VersioningConfiguration:
+        Status: Enabled
+
+  IoTIngestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: kc-iot-ingest-lab
+      CodeUri: src/
+      Handler: lambda_handler.lambda_handler
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref DataLakeBucketName
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref DataLakeBucketName
+      Events:
+        IngestHttpApi:
+          Type: HttpApi
+          Properties:
+            Path: /ingest
+            Method: POST
+
+Outputs:
+  HttpApiUrl:
+    Description: "HTTP API endpoint (base)"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
