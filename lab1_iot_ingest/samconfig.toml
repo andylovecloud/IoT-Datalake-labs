@@ -1,0 +1,15 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "kc-lab1-iot-ingest"
+resolve_s3 = true
+s3_prefix = "kc-lab1-iot-ingest"
+region = "eu-north-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = "DataLakeBucketName=\"kc-iot-datalake-${AWS::AccountId}\""
+image_repositories = []
+
+[default.global.parameters]
+region = "eu-north-1"
